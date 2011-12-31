@@ -25,8 +25,10 @@ Function newPlexMediaServer(pmsUrl, pmsName) As Object
 	pms.Scrobble = scrobble
 	pms.Unscrobble = unscrobble
 	pms.Rate = rate
+	pms.Delete = delete
 	pms.ExecuteCommand = issueCommand
 	pms.ExecutePostCommand = issuePostCommand
+	pms.ExecuteDeleteCommand = issueDeleteCommand
 	pms.UpdateAudioStreamSelection = updateAudioStreamSelection
 	pms.UpdateSubtitleStreamSelection = updateSubtitleStreamSelection
 	pms.Search = search
@@ -132,6 +134,32 @@ Function issueCommand(commandPath)
 	request = CreateObject("roUrlTransfer")
 	request.SetUrl(commandUrl)
 	request.GetToString()
+End Function
+
+Function delete(key)
+	commandUrl = key
+	m.ExecuteDeleteCommand(commandUrl)
+End Function
+
+' We need to send an HTTP DELETE command, but roUrlTransfer doesn't support it.
+' Do it the old fashioned way.
+Function issueDeleteCommand(commandPath)
+	tcp = createObject("roStreamSocket")
+	print "Delete: entered."
+	if tcp<>invalid
+		print "Delete: tcp valid."
+		addr = createObject("roSocketAddress")
+		addr.setAddress("192.168.195.251:32400")
+		tcp.setSendToAddress(addr)
+		tcp.connect()
+		if tcp.isConnected()
+			cmd = createObject("roByteArray")
+			' cmd.FromAsciiString("GET " + commandPath + " HTTP/1.0" +chr(13) +chr(10) +chr(13) + chr(10)) 
+			cmd.FromAsciiString("DELETE " + commandPath + " HTTP/1.0" +chr(13) +chr(10) +chr(13) + chr(10)) 
+			tcp.send(cmd, 0, cmd.Count())
+			tcp.close()
+		end if
+	end if
 End Function
 
 Function homePageContent() As Object
