@@ -40,7 +40,11 @@ Function showSpringboardScreen(screen, contentList, index) As Integer
         	else if buttonCommand = "subtitleStreamSelection" then
         		SelectSubtitleStream(server, metaDataArray.media)
         		metaDataArray = Populate(screen, contentList, index)
-        	endif
+		else if buttonCommand = "delete" then
+			DeleteTitle(server, contentList, index)
+			screen.Close()
+        	end if
+
         else if msg.isRemoteKeyPressed() then
         	'* index=4 -> left ; index=5 -> right
 			if msg.getIndex() = 4 then
@@ -229,6 +233,10 @@ Function AddButtons(screen, metadata, media) As Object
 	buttonCommands[str(buttonCount)] = "play"
 	buttonCount = buttonCount + 1
 	
+	screen.AddButton(buttonCount, "Delete")
+	buttonCommands[str(buttonCount)] = "delete"
+	buttonCount = buttonCount + 1
+	
 	mediaPart = media.preferredPart
 	subtitleStreams = []
 	audioStreams = []
@@ -254,6 +262,37 @@ Function AddButtons(screen, metadata, media) As Object
 	return buttonCommands
 End Function
 
+Function DeleteTitle(server, contentList, index)
+	port = CreateObject("roMessagePort")
+	dialog = CreateObject("roMessageDialog")
+	dialog.SetMessagePort(port)
+
+	dialog.SetTitle("Confirm File Delete")
+	dialog.SetText("Are you sure you want to delete?")
+	dialog.EnableBackButton(false)
+	dialog.AddButton(0, "No")
+	dialog.AddButton(1, "Yes")
+	dialog.Show()
+
+	while true
+		msg = wait(0, dialog.GetMessagePort())
+		if type(msg) = "roMessageDialogEvent"
+			if msg.isScreenClosed()
+				dialog.close()
+				exit while
+			else if msg.isButtonPressed() then
+				print "Deleting: " + str(msg.getIndex())
+				if msg.getIndex() = 1 then
+					server.Delete(contentList[index].key)
+					contentList.Delete(index)
+				end if
+				dialog.close()
+				exit while
+			end if
+		end if
+	end while
+End Function
+				
 Function TimeDisplay(intervalInSeconds) As String
 	hours = fix(intervalInSeconds/(60*60))
 	remainder = intervalInSeconds - hours*60*60
