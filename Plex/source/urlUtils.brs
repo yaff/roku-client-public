@@ -214,3 +214,16 @@ Function http_post_from_string_with_timeout(val As String, seconds as Integer) a
 
     return str
 End Function
+
+' Strip out the server name from a "http://..." url.
+' This preserves any port number attached to the server (such as :32400)
+Function getHostFromUrl(url As String) As String
+	tokens = url.Tokenize("/")
+	if tokens.Count() > 1 then
+		server = tokens[1]
+	else
+		server = ""
+	end if
+
+	return server
+End Function
