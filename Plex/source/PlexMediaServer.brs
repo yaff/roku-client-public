@@ -145,17 +145,17 @@ End Function
 ' Do it the old fashioned way.
 Function issueDeleteCommand(commandPath)
 	tcp = createObject("roStreamSocket")
-	print "Delete: entered."
+	serverAddress = getHostFromUrl(m.serverUrl)
 	if tcp<>invalid
-		print "Delete: tcp valid."
 		addr = createObject("roSocketAddress")
-		addr.setAddress("192.168.195.251:32400")
+		addr.setAddress(serverAddress)
 		tcp.setSendToAddress(addr)
 		tcp.connect()
 		if tcp.isConnected()
 			cmd = createObject("roByteArray")
-			' cmd.FromAsciiString("GET " + commandPath + " HTTP/1.0" +chr(13) +chr(10) +chr(13) + chr(10)) 
-			cmd.FromAsciiString("DELETE " + commandPath + " HTTP/1.0" +chr(13) +chr(10) +chr(13) + chr(10)) 
+			print "Deleting: " + commandPath + " from " + serverAddress
+			cmd.FromAsciiString("GET " + commandPath + " HTTP/1.0" +chr(13) +chr(10) +chr(13) + chr(10)) 
+			' cmd.FromAsciiString("DELETE " + commandPath + " HTTP/1.0" +chr(13) +chr(10) +chr(13) + chr(10)) 
 			tcp.send(cmd, 0, cmd.Count())
 			tcp.close()
 		end if
