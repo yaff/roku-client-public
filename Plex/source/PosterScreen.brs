@@ -82,7 +82,31 @@ Function showPosterScreen(screen, content) As Integer
                 contentType = selected.ContentType
                 print "Content type in poster screen:";contentType
                 if contentType = "movie" OR contentType = "episode" then
-                	displaySpringboardScreen(currentTitle, contentList, msg.GetIndex())
+                	springRet = displaySpringboardScreen(currentTitle, contentList, msg.GetIndex())
+					print "dSS ret: ";springRet
+
+					'* contentList is modified - refresh the screen items using
+					'* code from the isListFocused routine  (This should maybe be a function)
+					if (springRet = -20) then
+						print "refresh screen."
+						queryResponse = server.GetQueryResponse(content.sourceUrl, content.key)
+						names = server.GetListNames(queryResponse)
+						keys = server.GetListKeys(queryResponse)
+						paginationMode = names.Count() > 0
+						if names.Count() > 0 then
+							print "refresh screen."
+							screen.SetContentList(invalid)
+							focusedItem = msg.GetIndex()
+							contentKey = keys[focusedItem]
+							'print "Focused key:";key
+							paginationStart = 0
+							contentListArray = PopulateContentList(server, screen, queryResponse.sourceUrl, contentKey, paginationStart, totalSize)
+							contentList = contentListArray[0]
+							totalSize = contentListArray[1] 
+							screen.SetFocusedListItem(middlePoint)
+						endif
+					endif
+						
                 else if contentType = "clip" then
         			playPluginVideo(server, selected)
         		else if contentType = "album" then
@@ -260,9 +284,11 @@ Function showNextPosterScreen(currentTitle, selected As Object) As Dynamic
     return 0
 End Function
 
-Function displaySpringboardScreen(currentTitle, contentList, index)
+Function displaySpringboardScreen(currentTitle, contentList, index) As Integer
     print "Current title:";currentTitle
 	selected = contentList[index]
 	screen = preShowSpringboardScreen(selected, currentTitle, "")
-	showSpringboardScreen(screen, contentList, index)
+	retval = showSpringboardScreen(screen, contentList, index)
+	print "dSS ret: ";retval
+	return retval
 End Function

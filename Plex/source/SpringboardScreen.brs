@@ -40,10 +40,10 @@ Function showSpringboardScreen(screen, contentList, index) As Integer
         	else if buttonCommand = "subtitleStreamSelection" then
         		SelectSubtitleStream(server, metaDataArray.media)
         		metaDataArray = Populate(screen, contentList, index)
-		else if buttonCommand = "delete" then
-			DeleteTitle(server, contentList, index)
-			screen.Close()
-        	end if
+			else if buttonCommand = "delete" then
+				DeleteTitle(server, contentList, index)
+				return -20  '* Indicate that an item was deleted.
+			end if
 
         else if msg.isRemoteKeyPressed() then
         	'* index=4 -> left ; index=5 -> right
@@ -281,13 +281,13 @@ Function DeleteTitle(server, contentList, index)
 				dialog.close()
 				exit while
 			else if msg.isButtonPressed() then
-				print "Deleting: " + str(msg.getIndex())
-				if msg.getIndex() = 1 then
+				print "IDX: ";msg.getIndex()
+				if (msg.getIndex() = 1) then
 					server.Delete(contentList[index].key)
-					contentList.Delete(index)
+					'* contentList.Delete(index)
 				end if
 				dialog.close()
-				exit while
+				'* exit while
 			end if
 		end if
 	end while
