@@ -154,11 +154,13 @@ Function issueDeleteCommand(commandPath)
 		if tcp.isConnected()
 			cmd = createObject("roByteArray")
 			print "Deleting: " + commandPath + " from " + serverAddress
-			cmd.FromAsciiString("GET " + commandPath + " HTTP/1.0" +chr(13) +chr(10) +chr(13) + chr(10)) 
-			' cmd.FromAsciiString("DELETE " + commandPath + " HTTP/1.0" +chr(13) +chr(10) +chr(13) + chr(10)) 
+			'
+			'*** Use the GET method for testing when we don't want to actually delete things...
+			'cmd.FromAsciiString("GET " + commandPath + " HTTP/1.0" +chr(13) +chr(10) +chr(13) + chr(10)) 
+			cmd.FromAsciiString("DELETE " + commandPath + " HTTP/1.0" +chr(13) +chr(10) +chr(13) + chr(10)) 
 			tcp.send(cmd, 0, cmd.Count())
-			tcp.close()
 		end if
+		tcp.close()
 	end if
 End Function
 
